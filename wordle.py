@@ -5,21 +5,47 @@ from bs4 import BeautifulSoup
 import certifi
 import ssl
 
+extraNames = ['renata','nunu','willump','twisted','fate','master','yi', 'tahm', 'kench', 'jarvan','miss',]
 
-def main(length):
+def main(url, length):
 	champCorrectLength = []
-	champList = getChampions('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW')
+	sortChampList = []
+	champList = []
+	champListName = []
+	champListDoubleArray = []
+	unsplitChampList = getChampions(url)
+
 	if champList == None:
 		print("Title could not be found")
-	else:
-		i = 0
-		for name in champList:
-			if len(name.get_text()) == 6:
-				champCorrectLength.append(name.get_text())
 
+	#Get name of Champs from data into champListName
+	for name in unsplitChampList:
+		champListName.append(name.get_text())
+	#print(champListName)
+
+	#Split names if they contain a space, downside: it created a second layer in the array
+	for name in champListName:
+		#if statement cleaning up webscrape. --TODO: make this cleaner
+		if name.find('player') == -1 and name.find('FAQ') == -1 and name.find('scores') == -1 and name.find('info') == -1 and name.find('champions') == -1 and name.find('me') == -1 and name.find('League') == -1 and name.find('u.gg') == -1 and name.find('Git') == -1 and name.find('op.gg') == -1:
+			champListDoubleArray.append(name.split())
+	#pint(champListDoubleArray)
+
+	#create one array with all the elements by looping twice
+	for name in champListDoubleArray:
+		for i in name:
+			champList.append(i)
+
+	for name in champList:
+		sortChampList.append(name)
+		if len(name) == length:
+			champCorrectLength.append(name)
+
+	#print(sorted(sortChampList))
+	print("---------------- Divider Correct Array --------------------")
 	for name in champCorrectLength:
 		print(name)
 	return champCorrectLength
+
 
 def getTitle(url):
 	try:
@@ -72,9 +98,11 @@ def filter(champs): #filter on the random placed letters
 
 
 length = information()
-newChampList = main(length)
+newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length)
 filter(newChampList)
 
 #Implement system with correctly placed letters
+#Seperate champs space names
+#remove ` from names
 #Implement system that manages best first try etc..
 #Make code cleaner
