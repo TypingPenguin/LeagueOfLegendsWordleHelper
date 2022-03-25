@@ -41,7 +41,7 @@ def main(url, length):
 			champCorrectLength.append(name)
 
 	#print(sorted(sortChampList))
-	print("---------------- Divider Correct Array --------------------")
+	print("---------------- All Champs with " + str(length) + " characters--------------------")
 	for name in champCorrectLength:
 		print(name)
 	return champCorrectLength
@@ -90,6 +90,7 @@ def filter(champs): #filter on the random placed letters
 	#print (letters)
 	for letter in letters:
 			champs = [name for name in champs if name.find(letter) >= 0] #returns position of letters from 0...n
+	print("---------------- Possible champs with current letters --------------------")
 	print(champs)
 
 
