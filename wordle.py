@@ -4,8 +4,16 @@ from urllib.error import URLError
 from bs4 import BeautifulSoup
 import certifi
 import ssl
+import time
+import pyautogui
 
-extraNames = ['renata','nunu','willump','twisted','fate','master','yi', 'tahm', 'kench', 'jarvan','miss',]
+from selenium import webdriver
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+
+browser = webdriver.Firefox(executable_path='C:\gecko\geckodriver.exe')
+
+wordleURL = 'https://yordle.pages.dev/'
+
 
 def main(url, length):
 	champCorrectLength = []
@@ -96,11 +104,44 @@ def filter(champs): #filter on the random placed letters
 
 	return letters
 
+def findCharacters(url):
+	browser.get(url)
+#-----------Remove line if not in incognito anymore ---------
+	time.sleep(2)
+	#	closePopup = browser.find_element_by_class_name('absolute right-4 top-4')
+	closePopup = browser.find_element_by_id("headlessui-dialog-overlay-4")
+	
+	action = webdriver.common.action_chains.ActionChains(browser)
+	action.move_to_element_with_offset(closePopup, 5, 5)
+	action.click()
+	action.perform()
+	time.sleep(2)
+
+	boxes = browser.find_elements_by_class_name("letter-container")
+	characters = int((len(boxes)) / 6)
+	print (characters)
+
+	return characters
+
+##selenium
 
 
-length = information()
+
+
+length = findCharacters(wordleURL)
+
+pyautogui.write('Hell')
+
+
+
+#Uncomment for manual input
+#length = information()
 newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length)
 filter(newChampList)
+
+
+
+
 
 #Implement system with correctly placed letters
 #Seperate champs space names
