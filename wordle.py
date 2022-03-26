@@ -9,6 +9,7 @@ import pyautogui
 
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+from selenium.webdriver.common.by import By
 
 browser = webdriver.Firefox(executable_path='C:\gecko\geckodriver.exe')
 
@@ -107,7 +108,7 @@ def filter(champs): #filter on the random placed letters
 def findCharacters(url):
 	browser.get(url)
 #-----------Remove line if not in incognito anymore ---------
-	time.sleep(2)
+	time.sleep(1)
 	#	closePopup = browser.find_element_by_class_name('absolute right-4 top-4')
 	closePopup = browser.find_element_by_id("headlessui-dialog-overlay-4")
 	
@@ -115,7 +116,7 @@ def findCharacters(url):
 	action.move_to_element_with_offset(closePopup, 5, 5)
 	action.click()
 	action.perform()
-	time.sleep(2)
+	time.sleep(1)
 
 	boxes = browser.find_elements_by_class_name("letter-container")
 	characters = int((len(boxes)) / 6)
@@ -198,6 +199,12 @@ def findVowelsConsonants(champs):
 	champArray.sort(key = lambda x:len(x[1]) )
 	return (champArray)
 
+def enterAttempt(string):
+	for i in string:
+		pyautogui.write(i)
+		time.sleep(0.1)
+	pyautogui.keyDown('enter')
+	pyautogui.keyUp('enter')
 
 #def bestOption(champs):
 
@@ -209,22 +216,32 @@ def findVowelsConsonants(champs):
 
 
 
-#########length = findCharacters(wordleURL)
+length = findCharacters(wordleURL)
 
 #pyautogui.write('Hell')
 
 
 
 #Uncomment for manual input of character length
-length = information()
+#length = information()
 
 newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length) #filter on amount of characters array of possible candidates
 
 #make filter to choose one of the champs
 sortedChampList = findVowelsConsonants(newChampList)
 print(sortedChampList)
-print(len(sortedChampList))
 
+#try first attempt
+lastElement = len(sortedChampList) - 1
+firstAttempt = sortedChampList[lastElement][0]
+print (firstAttempt)
+enterAttempt(firstAttempt)
+
+#what letters where correct?
+time.sleep(0.5)
+
+correctLetter = browser.find_elements(By.CLASS_NAME, value='text-amber-100')
+print(correctLetter.getText())
 
 
 
