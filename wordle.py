@@ -102,7 +102,7 @@ def filter(champs): #filter on the random placed letters
 	print(champs)
 
 
-	return letters
+	return champs
 
 def findCharacters(url):
 	browser.get(url)
@@ -123,21 +123,125 @@ def findCharacters(url):
 
 	return characters
 
+
+def isVowel(ch):
+     
+    # To handle lower case
+    ch = ch.upper()
+ 
+    return (ch == 'A' or ch == 'E' or
+            ch == 'I' or ch == 'O' or
+            ch == 'U') and ord(ch) >= 65 and ord(ch) <= 90
+
+def isConsonnant(ch):
+     
+    # To handle lower case
+    ch = ch.upper()
+ 
+    return not (ch == 'A' or ch == 'E' or
+            ch == 'I' or ch == 'O' or
+            ch == 'U') and ord(ch) >= 65 and ord(ch) <= 90
+ 
+def totalVowels(string):
+    vowels = ''
+    count = 0
+     
+    for i in range(len(string)):
+ 
+        # To check is character is Consonant
+        if (isVowel(string[i])):
+        	if vowels.find(string[i].lower())<0:
+        		vowels += string[i].lower()
+
+        	#print(string[i].lower())
+             
+    return vowels
+
+def totalConsonants(string):
+    consonants = ''
+    count = 0
+     
+    for i in range(len(string)):
+ 
+        # To check is character is Consonant
+        if (isConsonnant(string[i])):
+        	if consonants.find(string[i].lower())<0:
+        		consonants += string[i].lower()
+
+        	#print(string[i].lower())
+             
+    return consonants
+
+#def findVowelsConsonants(champs):
+#	for x in champs:
+#		champArray = []
+#		vowels = totalVowels(x)
+#		info = x
+#		info = {
+#		"name" : x,
+#		"consonants":"",
+#		"vowels": vowels,
+#		}
+#		print(x)
+#		champArray.append(info)
+#	print (champArray)
+
+def findVowelsConsonants(champs):
+	#could use dictionaries, but takes more work
+	champArray = []
+	for x in champs:
+		print(x)
+		#Creates array for every champ, [0] champ name, [1]different Vowels, [2]different Consonants
+		champArray.append([x,totalVowels(x),totalConsonants(x)])
+
+	champArray.sort(key = lambda x:len(x[1]))
+	print (champArray[][].sort())
+
+
+
+
+
+
+	return (champArray)
+
+
+#def bestOption(champs):
+
+
+
+
 ##selenium
 
 
 
 
-length = findCharacters(wordleURL)
+#########length = findCharacters(wordleURL)
 
-pyautogui.write('Hell')
+#pyautogui.write('Hell')
 
 
 
-#Uncomment for manual input
-#length = information()
-newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length)
-filter(newChampList)
+#Uncomment for manual input of character length
+length = information()
+
+newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length) #filter on amount of characters array of possible candidates
+
+#make filter to choose one of the champs
+findVowelsConsonants(newChampList)
+
+
+
+
+
+
+champs = filter(newChampList) #filter on specific leters
+
+
+
+
+
+
+
 
 
 
