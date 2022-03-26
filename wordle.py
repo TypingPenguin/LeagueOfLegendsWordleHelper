@@ -195,7 +195,7 @@ def findVowelsConsonants(champs):
 		champArray.append([x,totalVowels(x),totalConsonants(x)])
 
 	champArray.sort(key = lambda x:len(x[1]))
-	print (champArray[][].sort())
+	print (champArray)
 
 
 
