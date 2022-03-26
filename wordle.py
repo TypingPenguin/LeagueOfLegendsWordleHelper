@@ -193,15 +193,9 @@ def findVowelsConsonants(champs):
 		print(x)
 		#Creates array for every champ, [0] champ name, [1]different Vowels, [2]different Consonants
 		champArray.append([x,totalVowels(x),totalConsonants(x)])
+#TODO: improve sorting by also sorting on consonants (more different the more info you get)
 
-	champArray.sort(key = lambda x:len(x[1]))
-	print (champArray)
-
-
-
-
-
-
+	champArray.sort(key = lambda x:len(x[1]) )
 	return (champArray)
 
 
@@ -227,8 +221,9 @@ length = information()
 newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length) #filter on amount of characters array of possible candidates
 
 #make filter to choose one of the champs
-findVowelsConsonants(newChampList)
-
+sortedChampList = findVowelsConsonants(newChampList)
+print(sortedChampList)
+print(len(sortedChampList))
 
 
 
