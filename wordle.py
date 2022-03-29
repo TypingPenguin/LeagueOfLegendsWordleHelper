@@ -2,6 +2,7 @@ from urllib.request import urlopen
 from urllib.error import HTTPError
 from urllib.error import URLError
 from bs4 import BeautifulSoup
+from readDoc import *
 import certifi
 import ssl
 import time
@@ -9,20 +10,20 @@ import pyautogui
 
 
 
-## Raspbi
+## Raspbi/Chrome
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 chrome_options = Options()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument('--disable-dev-shm-usage')
+#chrome_options.add_argument('--headless')
+#chrome_options.add_argument('--no-sandbox')
+#chrome_options.add_argument('--disable-gpu')
+#chrome_options.add_argument('--disable-dev-shm-usage')
 browser = webdriver.Chrome(options=chrome_options, executable_path='C:\gecko\chromedriver.exe')
 
 
-##My desktop
+##Firefox
 #from selenium import webdriver
 #from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 #from selenium.webdriver.common.by import By
@@ -31,6 +32,10 @@ browser = webdriver.Chrome(options=chrome_options, executable_path='C:\gecko\chr
 
 
 wordleURL = 'https://yordle.pages.dev/'
+champURL = 'https://championmastery.gg/summoner?summoner=a+penguin&region=EUW'
+
+
+#Some global variables
 blackLetters = []
 orangeLetters = []
 greenLetters = []
@@ -38,22 +43,24 @@ greenLetters = []
 
 
 
-def main(url, length):
+def sortLength(rawChampList	, length, category):
 	champCorrectLength = []
 	sortChampList = []
 	champList = []
 	champListName = []
 	champListDoubleArray = []
-	unsplitChampList = getChampions(url)
 	champCorrectLengthLower = []
 
-	if champList == None:
-		print("Title could not be found")
-
+	if rawChampList == None: #error management
+		print("empty object in sort length")
 	#Get name of Champs from data into champListName
-	for name in unsplitChampList:
-		champListName.append(name.get_text())
-	#print(champListName)
+
+	if category	== 'online': 
+		for name in rawChampList:
+			champListName.append(name.get_text())
+			#print(champListName)
+	else:
+		champListName = rawChampList
 
 	#Split names if they contain a space, downside: it created a second layer in the array
 	for name in champListName:
@@ -137,18 +144,7 @@ def filter(champs, greenLetters, orangeLetters, blackLetters): #filter on the ra
 	return champs
 
 def findCharacters(url):
-	browser.get(url)
-#-----------Remove line if not in incognito anymore ---------
 	time.sleep(1)
-	#	closePopup = browser.find_element_by_class_name('absolute right-4 top-4')
-	closePopup = browser.find_element_by_id("headlessui-dialog-overlay-4")
-	
-	action = webdriver.common.action_chains.ActionChains(browser)
-	action.move_to_element_with_offset(closePopup, 5, 5)
-	action.click()
-	action.perform()
-	time.sleep(1)
-
 	boxes = browser.find_elements_by_class_name("letter-container")
 	characters = int((len(boxes)) / 6)
 	print (characters)
@@ -238,87 +234,120 @@ def enterAttempt(string):
 	webdriver.ActionChains(browser).send_keys(Keys.RETURN).perform()
 
 
+def startSession(url):
+	browser.get(url)
+#-----------Remove line if not in incognito anymore ---------
+	time.sleep(1)
+	#	closePopup = browser.find_element_by_class_name('absolute right-4 top-4')
+	closePopup = browser.find_element(By.ID, "headlessui-dialog-overlay-4")
+	
+	action = webdriver.common.action_chains.ActionChains(browser)
+	action.move_to_element_with_offset(closePopup, 5, 5)
+	action.click()
+	action.perform()
+	time.sleep(1)
+	return
+
+
 #def bestOption(champs):
 
 
 
-length = findCharacters(wordleURL)
-for i in range(length):
-	greenLetters.append(' ')
 
-#pyautogui.write('Hell')
+def main(category):
+	blackLetters = []
+	orangeLetters = []
+	greenLetters = []		
 
+	#find length of the attempts
+	length= findCharacters(wordleURL)
 
+	#initialyse the array of correct Letters
+	for i in range(length):
+			greenLetters.append(' ')
 
-#Uncomment for manual input of character length
-#length = information()
-
-newChampList = main('https://championmastery.gg/summoner?summoner=a+penguin&region=EUW', length) #filter on amount of characters array of possible candidates
-
-#make filter to choose one of the champs
-sortedChampList = findVowelsConsonants(newChampList)
-print(sortedChampList)
-
-#try first attempt
-lastElement = len(sortedChampList) - 1
-attempt = sortedChampList[lastElement][0]
-print (attempt)
-
-#attempt = 'leona'
+	#Uncomment for manual input of character length
+	#length = information()
 
 
-for i in range(6):
-	x = 0
-	print(i)
-	#make choice here
-	if i > 0:
-		newChampList = filter(newChampList, greenLetters, orangeLetters, blackLetters)
-		attempt = newChampList[0] #TODO don't make it first element of the list
-	time.sleep(2)
-	enterAttempt(attempt)
-	newChampList.remove(attempt)
-	time.sleep(2)
-	allChrHTML = browser.find_element(By.CLASS_NAME, value= 'pb-20')
-	rowChrHTML = allChrHTML.find_elements(By.CLASS_NAME, value ='mb-1')
+	#-------- depending on URL based or TXTbased documents
+	if category == 'online':
+		rawChampList = getChampions(champURL) #only supported for champs currently
+	else:
+		print('igothere')
+		rawChampList = readText(category)
+		time.sleep(3)
+	print(rawChampList)
+	
+
+	newChampList = sortLength(rawChampList, length, category) #filter on amount of characters array of possible candidates
+	print(newChampList)
+
+	#make filter to choose one of the champs
+	sortedChampList = findVowelsConsonants(newChampList)
+	print(sortedChampList)
+
+	#try first attempt
+	lastElement = len(sortedChampList) - 1
+	attempt = sortedChampList[lastElement][0]
+	print (attempt)
+
+	#attempt = 'leona'
 
 
-	chrContainerHTML = rowChrHTML[i].find_elements(By.CLASS_NAME, 'w-14')
-	for y in chrContainerHTML: #for every container in the row
-		chrInContainer = y.find_element(By.XPATH, './/*').text
-		print(y.get_attribute("class"))
+	for i in range(6):
+		x = 0
+		print(i)
+		#make choice here
+		if i > 0:
+			newChampList = filter(newChampList, greenLetters, orangeLetters, blackLetters)
+			attempt = newChampList[0] #TODO don't make it first element of the list
+		time.sleep(2)
+		enterAttempt(attempt)
+		newChampList.remove(attempt)
+		time.sleep(2)
+		allChrHTML = browser.find_element(By.CLASS_NAME, value= 'pb-20')
+		rowChrHTML = allChrHTML.find_elements(By.CLASS_NAME, value ='mb-1')
 
-		if y.get_attribute("class").find('dark:bg-transparent') >= 0:
-			#print("faulty")
-			#print (chrInContainer)
-			blackLetters.append(str(chrInContainer).lower())
-			print('black: ')
-			print(blackLetters)
-		if y.get_attribute("class").find('dark:border-green-700') >= 0:
-			#print("green")
-			#print(chrInContainer)
-			greenLetters[x] = (str(chrInContainer).lower())
-			print('green: ')
-			print(greenLetters)
-		if y.get_attribute("class").find('dark:border-amber-700') >= 0:
-			#print("orange")
-			#print(chrInContainer)
-			orangeLetters.append(str(chrInContainer).lower())
-			print('orange: ')
-			print(orangeLetters)
-		x += 1
-	win = len(greenLetters)
-	correctChrs = 0
-	for greenLetter in greenLetters:
+
+		chrContainerHTML = rowChrHTML[i].find_elements(By.CLASS_NAME, 'w-14')
+		for y in chrContainerHTML: #for every container in the row
+			chrInContainer = y.find_element(By.XPATH, './/*').text
+			print(y.get_attribute("class"))
+
+			if y.get_attribute("class").find('dark:bg-transparent') >= 0:
+				#print("faulty")
+				#print (chrInContainer)
+				blackLetters.append(str(chrInContainer).lower())
+				print('black: ')
+				print(blackLetters)
+			if y.get_attribute("class").find('dark:border-green-700') >= 0:
+				#print("green")
+				#print(chrInContainer)
+				greenLetters[x] = (str(chrInContainer).lower())
+				print('green: ')
+				print(greenLetters)
+			if y.get_attribute("class").find('dark:border-amber-700') >= 0:
+				#print("orange")
+				#print(chrInContainer)
+				orangeLetters.append(str(chrInContainer).lower())
+				print('orange: ')
+				print(orangeLetters)
+			x += 1
 		win = len(greenLetters)
-		if greenLetter != ' ':
-			correctChrs +=1
-		if correctChrs == win:
-			print("YOU FOUND THE CORRECT ANSWER")
-			print("---------------------------------------FINAL ANSWER---------------------------------------")
-			print("--------				"+attempt+"				-------------")
-			print("---------------------------------------FINAL ANSWER---------------------------------------")
-			browser.quit()
-			exit("fuck yeah")
+		correctChrs = 0
+		for greenLetter in greenLetters:
+			win = len(greenLetters)
+			if greenLetter != ' ':
+				correctChrs +=1
+			if correctChrs == win:
+				print("YOU FOUND THE CORRECT ANSWER")
+				print("---------------------------------------FINAL ANSWER---------------------------------------")
+				print("--------				"+attempt+"				-------------")
+				print("---------------------------------------FINAL ANSWER---------------------------------------")
+				return
+				browser.quit()
+				exit("fuck yeah")
 
 
 
@@ -328,23 +357,19 @@ for i in range(6):
 
 
 
-#correctLetterRightPlace = browser.find_elements(By.CLASS_NAME, value='dark\:border-green-700').get_attribute("class")
-#print(correctLetterRightPlace)
-#childrenCorrectLetterRightPlace = correctLetterRightPlace[0].find_element(By.XPATH, './/*').get_attribute("class")
-#print(childrenCorrectLetterRightPlace)
+	#correctLetterRightPlace = browser.find_elements(By.CLASS_NAME, value='dark\:border-green-700').get_attribute("class")
+	#print(correctLetterRightPlace)
+	#childrenCorrectLetterRightPlace = correctLetterRightPlace[0].find_element(By.XPATH, './/*').get_attribute("class")
+	#print(childrenCorrectLetterRightPlace)
 
 
 
-#correctLetterWrongPlace = browser.find_elements(By.CLASS_NAME, value='dark:border-amber-700')
-#print(len("orange" + correctLetterWrongPlace))
+	#correctLetterWrongPlace = browser.find_elements(By.CLASS_NAME, value='dark:border-amber-700')
+	#print(len("orange" + correctLetterWrongPlace))
 
 
 
-champs = filter(newChampList) #filter on specific leters
-
-
-
-
+	champs = filter(newChampList) #filter on specific leters
 
 
 
@@ -353,8 +378,22 @@ champs = filter(newChampList) #filter on specific leters
 
 
 
-#Implement system with correctly placed letters
-#Seperate champs space names
-#remove ` from names
-#Implement system that manages best first try etc..
-#Make code cleaner
+
+
+
+
+	#Implement system with correctly placed letters
+	#Seperate champs space names
+	#remove ` from names
+	#Implement system that manages best first try etc..
+	#Make code cleaner
+startSession(wordleURL)
+main("champions.txt")
+time.sleep(5)
+browser.find_element(By.CLASS_NAME,'px-9').click()
+main("abilities.txt")
+time.sleep(10)
+browser.find_element(By.CLASS_NAME,'hover\:bg-indigo-700').click()
+time.sleep(10)
+browser.quit()
+exit("Congrats")
