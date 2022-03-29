@@ -7,11 +7,28 @@ import ssl
 import time
 import pyautogui
 
-from selenium import webdriver
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-from selenium.webdriver.common.by import By
 
-browser = webdriver.Firefox(executable_path='C:\gecko\geckodriver.exe')
+
+## Raspbi
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--disable-dev-shm-usage')
+browser = webdriver.Chrome(options=chrome_options, executable_path='C:\gecko\chromedriver.exe')
+
+
+##My desktop
+#from selenium import webdriver
+#from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+#from selenium.webdriver.common.by import By
+#browser = webdriver.Firefox(executable_path='C:\gecko\geckodriver.exe')
+
+
 
 wordleURL = 'https://yordle.pages.dev/'
 blackLetters = []
@@ -214,11 +231,12 @@ def findVowelsConsonants(champs):
 	return (champArray)
 
 def enterAttempt(string):
+
 	for i in string:
-		pyautogui.write(i)
+		webdriver.ActionChains(browser).send_keys(i).perform()
 		time.sleep(0.1)
-	pyautogui.keyDown('enter')
-	pyautogui.keyUp('enter')
+	webdriver.ActionChains(browser).send_keys(Keys.RETURN).perform()
+
 
 #def bestOption(champs):
 
@@ -246,6 +264,7 @@ lastElement = len(sortedChampList) - 1
 attempt = sortedChampList[lastElement][0]
 print (attempt)
 
+#attempt = 'leona'
 
 
 for i in range(6):
@@ -295,7 +314,12 @@ for i in range(6):
 			correctChrs +=1
 		if correctChrs == win:
 			print("YOU FOUND THE CORRECT ANSWER")
+			print("---------------------------------------FINAL ANSWER---------------------------------------")
+			print("--------				"+attempt+"				-------------")
+			print("---------------------------------------FINAL ANSWER---------------------------------------")
+			browser.quit()
 			exit("fuck yeah")
+
 
 
 
