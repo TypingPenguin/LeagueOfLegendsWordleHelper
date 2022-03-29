@@ -14,6 +14,11 @@ from selenium.webdriver.common.by import By
 browser = webdriver.Firefox(executable_path='C:\gecko\geckodriver.exe')
 
 wordleURL = 'https://yordle.pages.dev/'
+blackLetters = []
+orangeLetters = []
+greenLetters = []
+
+
 
 
 def main(url, length):
@@ -23,6 +28,7 @@ def main(url, length):
 	champListName = []
 	champListDoubleArray = []
 	unsplitChampList = getChampions(url)
+	champCorrectLengthLower = []
 
 	if champList == None:
 		print("Title could not be found")
@@ -53,7 +59,9 @@ def main(url, length):
 	print("---------------- All Champs with " + str(length) + " characters--------------------")
 	for name in champCorrectLength:
 		print(name)
-	return champCorrectLength
+	for name in champCorrectLength:
+		champCorrectLengthLower.append(name.lower())
+	return champCorrectLengthLower
 
 
 def getTitle(url):
@@ -94,11 +102,17 @@ def information():
 	x = int(input("amount of characters:"))
 	return x
 
-def filter(champs): #filter on the random placed letters
-	letters = input("letters that are correct:").split()
+def filter(champs, greenLetters, orangeLetters, blackLetters): #filter on the random placed letters
+	#letters = input("letters that are correct:").split()
 	#print (letters)
-	for letter in letters:
-			champs = [name for name in champs if name.find(letter) >= 0] #returns position of letters from 0...n
+	x = 0 #counter for position in name attempt
+	for letter in greenLetters:
+		champs = [name for name in champs if name[x] == letter or letter == ' '] #check if empty slot or same letter in same place
+		x += 1
+	for letter in orangeLetters:
+		champs = [name for name in champs if name.find(letter) >= 0] #returns position of letters from 0...n
+	for letter in blackLetters:
+		champs = [name for name in champs if name.find(letter) == -1]
 	print("---------------- Possible champs with current letters --------------------")
 	print(champs)
 
@@ -210,13 +224,9 @@ def enterAttempt(string):
 
 
 
-
-##selenium
-
-
-
-
 length = findCharacters(wordleURL)
+for i in range(length):
+	greenLetters.append(' ')
 
 #pyautogui.write('Hell')
 
@@ -233,16 +243,76 @@ print(sortedChampList)
 
 #try first attempt
 lastElement = len(sortedChampList) - 1
-firstAttempt = sortedChampList[lastElement][0]
-print (firstAttempt)
-enterAttempt(firstAttempt)
+attempt = sortedChampList[lastElement][0]
+print (attempt)
 
-#what letters where correct?
-time.sleep(0.5)
 
-correctLetter = browser.find_elements(By.CLASS_NAME, value='text-amber-100')
-print(correctLetter.getText())
 
+for i in range(6):
+	x = 0
+	print(i)
+	#make choice here
+	if i > 0:
+		newChampList = filter(newChampList, greenLetters, orangeLetters, blackLetters)
+		attempt = newChampList[0] #TODO don't make it first element of the list
+	time.sleep(2)
+	enterAttempt(attempt)
+	newChampList.remove(attempt)
+	time.sleep(2)
+	allChrHTML = browser.find_element(By.CLASS_NAME, value= 'pb-20')
+	rowChrHTML = allChrHTML.find_elements(By.CLASS_NAME, value ='mb-1')
+
+
+	chrContainerHTML = rowChrHTML[i].find_elements(By.CLASS_NAME, 'w-14')
+	for y in chrContainerHTML: #for every container in the row
+		chrInContainer = y.find_element(By.XPATH, './/*').text
+		print(y.get_attribute("class"))
+
+		if y.get_attribute("class").find('dark:bg-transparent') >= 0:
+			#print("faulty")
+			#print (chrInContainer)
+			blackLetters.append(str(chrInContainer).lower())
+			print('black: ')
+			print(blackLetters)
+		if y.get_attribute("class").find('dark:border-green-700') >= 0:
+			#print("green")
+			#print(chrInContainer)
+			greenLetters[x] = (str(chrInContainer).lower())
+			print('green: ')
+			print(greenLetters)
+		if y.get_attribute("class").find('dark:border-amber-700') >= 0:
+			#print("orange")
+			#print(chrInContainer)
+			orangeLetters.append(str(chrInContainer).lower())
+			print('orange: ')
+			print(orangeLetters)
+		x += 1
+	win = len(greenLetters)
+	correctChrs = 0
+	for greenLetter in greenLetters:
+		win = len(greenLetters)
+		if greenLetter != ' ':
+			correctChrs +=1
+		if correctChrs == win:
+			print("YOU FOUND THE CORRECT ANSWER")
+			exit("fuck yeah")
+
+
+
+
+
+
+
+
+#correctLetterRightPlace = browser.find_elements(By.CLASS_NAME, value='dark\:border-green-700').get_attribute("class")
+#print(correctLetterRightPlace)
+#childrenCorrectLetterRightPlace = correctLetterRightPlace[0].find_element(By.XPATH, './/*').get_attribute("class")
+#print(childrenCorrectLetterRightPlace)
+
+
+
+#correctLetterWrongPlace = browser.find_elements(By.CLASS_NAME, value='dark:border-amber-700')
+#print(len("orange" + correctLetterWrongPlace))
 
 
 
