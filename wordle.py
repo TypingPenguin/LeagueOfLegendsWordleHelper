@@ -6,7 +6,15 @@ from readDoc import *
 import certifi
 import ssl
 import time
-import pyautogui
+from tkinter import Tk
+
+#discord stuff
+import discord
+import os
+from dotenv import load_dotenv
+from discord.ext import commands, tasks # Importing tasks here
+
+
 
 
 
@@ -16,11 +24,13 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 chrome_options = Options()
-#chrome_options.add_argument('--headless')
-#chrome_options.add_argument('--no-sandbox')
-#chrome_options.add_argument('--disable-gpu')
-#chrome_options.add_argument('--disable-dev-shm-usage')
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-gpu')
+chrome_options.add_argument('--disable-dev-shm-usage')
 browser = webdriver.Chrome(options=chrome_options, executable_path='C:\gecko\chromedriver.exe')
+#browser = None
+#browser.close()
 
 
 ##Firefox
@@ -28,6 +38,14 @@ browser = webdriver.Chrome(options=chrome_options, executable_path='C:\gecko\chr
 #from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 #from selenium.webdriver.common.by import By
 #browser = webdriver.Firefox(executable_path='C:\gecko\geckodriver.exe')
+
+
+#discord Stuff
+load_dotenv()
+
+client = discord.Client()
+
+
 
 
 
@@ -39,7 +57,8 @@ champURL = 'https://championmastery.gg/summoner?summoner=a+penguin&region=EUW'
 blackLetters = []
 orangeLetters = []
 greenLetters = []
-
+global countGlobal
+countGlobal = 0
 
 
 
@@ -237,7 +256,7 @@ def enterAttempt(string):
 def startSession(url):
 	browser.get(url)
 #-----------Remove line if not in incognito anymore ---------
-	time.sleep(1)
+	time.sleep(5)
 	#	closePopup = browser.find_element_by_class_name('absolute right-4 top-4')
 	closePopup = browser.find_element(By.ID, "headlessui-dialog-overlay-4")
 	
@@ -260,7 +279,7 @@ def main(category):
 	greenLetters = []		
 
 	#find length of the attempts
-	length= findCharacters(wordleURL)
+	length = findCharacters(wordleURL)
 
 	#initialyse the array of correct Letters
 	for i in range(length):
@@ -293,7 +312,6 @@ def main(category):
 	print (attempt)
 
 	#attempt = 'leona'
-
 
 	for i in range(6):
 		x = 0
@@ -351,49 +369,41 @@ def main(category):
 
 
 
-
-
-
-
-
-
-	#correctLetterRightPlace = browser.find_elements(By.CLASS_NAME, value='dark\:border-green-700').get_attribute("class")
-	#print(correctLetterRightPlace)
-	#childrenCorrectLetterRightPlace = correctLetterRightPlace[0].find_element(By.XPATH, './/*').get_attribute("class")
-	#print(childrenCorrectLetterRightPlace)
-
-
-
-	#correctLetterWrongPlace = browser.find_elements(By.CLASS_NAME, value='dark:border-amber-700')
-	#print(len("orange" + correctLetterWrongPlace))
-
-
-
-	champs = filter(newChampList) #filter on specific leters
-
-
-
-
-
-
-
-
-
-
-
-
 	#Implement system with correctly placed letters
 	#Seperate champs space names
 	#remove ` from names
 	#Implement system that manages best first try etc..
 	#Make code cleaner
-startSession(wordleURL)
-main("champions.txt")
-time.sleep(5)
-browser.find_element(By.CLASS_NAME,'px-9').click()
-main("abilities.txt")
-time.sleep(10)
-browser.find_element(By.CLASS_NAME,'hover\:bg-indigo-700').click()
-time.sleep(10)
-browser.quit()
-exit("Congrats")
+@client.event
+async def on_message(message):
+	if message.author == client.user:
+		return
+
+	if message.content.startswith('$wordle'):
+		await message.channel.send("'You can't beat me' -Kayle" )
+		await message.channel.send("I'm currently solving the worlde" )
+		startSession(wordleURL)
+		main("champions.txt")
+		time.sleep(5)
+		browser.find_element(By.CLASS_NAME,'px-9').click()
+
+		await message.channel.send("Found the champ, now onto the abilities" )
+		main("abilities.txt")
+		time.sleep(5)
+		browser.find_element(By.CLASS_NAME,'hover\:bg-indigo-700').click()
+		time.sleep(5)
+		share = Tk().clipboard_get()
+		await message.channel.send("GOTTEM!" )
+		##TODO make discord bot that shares "share"
+
+		print(share)
+		browser.execute_script("window.localStorage.clear();")
+		browser.get('https://www.google.com/')
+		#browser.refresh()
+		#exit("Congrats")
+
+		await message.channel.send(share)
+		return
+
+
+client.run(os.getenv('TOKEN'))
