@@ -24,10 +24,10 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 chrome_options = Options()
-chrome_options.add_argument('--headless')
-chrome_options.add_argument('--no-sandbox')
-chrome_options.add_argument('--disable-gpu')
-chrome_options.add_argument('--disable-dev-shm-usage')
+#chrome_options.add_argument('--headless')
+#chrome_options.add_argument('--no-sandbox')
+#chrome_options.add_argument('--disable-gpu')
+#chrome_options.add_argument('--disable-dev-shm-usage')
 browser = webdriver.Chrome(options=chrome_options, executable_path='C:\gecko\chromedriver.exe')
 #browser = None
 #browser.close()
@@ -323,22 +323,30 @@ def main(category):
 		time.sleep(2)
 		enterAttempt(attempt)
 		newChampList.remove(attempt)
-		time.sleep(2)
+		time.sleep(5)
 		allChrHTML = browser.find_element(By.CLASS_NAME, value= 'pb-20')
 		rowChrHTML = allChrHTML.find_elements(By.CLASS_NAME, value ='mb-1')
 
 
 		chrContainerHTML = rowChrHTML[i].find_elements(By.CLASS_NAME, 'w-14')
 		for y in chrContainerHTML: #for every container in the row
+			skip = 0
 			chrInContainer = y.find_element(By.XPATH, './/*').text
 			print(y.get_attribute("class"))
 
 			if y.get_attribute("class").find('dark:bg-transparent') >= 0:
 				#print("faulty")
 				#print (chrInContainer)
-				blackLetters.append(str(chrInContainer).lower())
-				print('black: ')
-				print(blackLetters)
+				for letter in greenLetters:
+					if letter.find(chrInContainer.lower()) >= 0:
+						skip = 1
+				for letter in orangeLetters: 
+					if letter.find(chrInContainer.lower()) >= 0:
+						skip = 1
+				if skip == 0:
+					blackLetters.append(str(chrInContainer).lower())
+					print('black: ')
+					print(blackLetters)
 			if y.get_attribute("class").find('dark:border-green-700') >= 0:
 				#print("green")
 				#print(chrInContainer)
